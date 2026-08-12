@@ -1,0 +1,39 @@
+# Codemagic CI — builds an installable AccountKeeping Android APK.
+#
+# The uploaded project ships only lib/ + a bare AndroidManifest.xml, so the
+# first step regenerates the Android platform files (Gradle, wrapper,
+# MainActivity, launcher icons). The default Flutter template signs the
+# release build with the debug key, so the resulting app-release.apk is
+# directly installable for testing — no keystore setup required.
+#
+# After a green build, download app-release.apk from the build artifacts, then:
+#   scp app-release.apk root@accountkeeping.co:/opt/accountkeeping/downloads/AccountKeeping.apk
+workflows:
+  android-apk:
+    name: AccountKeeping Android APK
+    instance_type: linux_x2
+    max_build_duration: 30
+    environment:
+      flutter: stable
+      java: 17
+    scripts:
+      - name: Regenerate Android platform files
+        script: |
+          flutter create --org com.akjava --project-name account_keeping_mobile --platforms=android .
+      - name: Guarantee INTERNET permission + app label
+        script: |
+          MAN=android/app/src/main/AndroidManifest.xml
+          grep -q 'android.permission.INTERNET' "$MAN" || \
+            sed -i 's#<application#<uses-permission android:name="android.permission.INTERNET"/>\n    <application#' "$MAN"
+          sed -i 's#android:label="[^"]*"#android:label="AccountKeeping"#' "$MAN"
+          echo "----- final manifest -----"; cat "$MAN"
+      - name: Flutter pub get
+        script: flutter pub get
+      - name: Build release APK
+        script: flutter build apk --release
+    artifacts:
+      - build/app/outputs/flutter-apk/app-release.apk
+    publishing:
+      email:
+        recipients:
+          - anuragpauldani@gmail.com

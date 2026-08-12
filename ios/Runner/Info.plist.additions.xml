@@ -1,0 +1,13 @@
+<!--
+  iOS config snippet — merge into ios/Runner/Info.plist (inside the top <dict>)
+  after running `flutter create .`.
+-->
+<key>CFBundleDisplayName</key>
+<string>Account Keeping</string>
+
+<!-- Allow plain HTTP only while testing a local dev server. Remove for production (use HTTPS). -->
+<key>NSAppTransportSecurity</key>
+<dict>
+    <key>NSAllowsArbitraryLoads</key>
+    <true/>
+</dict>
