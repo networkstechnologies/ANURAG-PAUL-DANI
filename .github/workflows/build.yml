@@ -1,4 +1,4 @@
-﻿name: Build Android APK
+name: Build Android APK
 
 on:
   push:
@@ -25,13 +25,6 @@ jobs:
 
       - name: Regenerate Android platform files
         run: flutter create --org com.akjava --project-name account_keeping_mobile --platforms=android .
-
-      - name: Force compileSdk 36 (plugins require 36+)
-        run: |
-          G=android/app/build.gradle.kts
-          [ -f "$G" ] || G=android/app/build.gradle
-          sed -i 's/flutter.compileSdkVersion/36/' "$G"
-          echo "----- gradle sdk lines -----"; grep -nE 'compileSdk|targetSdk|minSdk' "$G" || true
 
       - name: Guarantee INTERNET permission and app label
         run: |
